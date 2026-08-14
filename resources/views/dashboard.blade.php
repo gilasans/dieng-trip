@@ -13,8 +13,6 @@
 
 @section('content')
 <div class="space-y-4">
-
-    {{-- Financial Overview Card --}}
     <div class="card-gradient p-5 animate-fade-in">
         <div class="flex items-center justify-between mb-4">
             <div>
@@ -25,7 +23,6 @@
                 <span class="text-2xl">💰</span>
             </div>
         </div>
-
         <div class="grid grid-cols-2 gap-3 mb-4">
             <div class="bg-white/15 rounded-xl p-3">
                 <p class="text-emerald-100 text-xs">Pengeluaran</p>
@@ -48,7 +45,6 @@
         </div>
     </div>
 
-    {{-- Trip Info Card --}}
     @if($trip)
     <div class="card p-4 animate-fade-in delay-100">
         <div class="flex items-center gap-3 mb-3">
@@ -81,7 +77,6 @@
     </div>
     @endif
 
-    {{-- Quick Actions --}}
     <div class="grid grid-cols-4 gap-2 animate-fade-in delay-200">
         <a href="{{ route('expenses.index') }}" class="card p-3 flex flex-col items-center gap-1 text-center">
             <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
@@ -109,7 +104,6 @@
         </a>
     </div>
 
-    {{-- Upcoming Itinerary --}}
     @if($upcomingItineraries->count() > 0)
     <div class="animate-fade-in delay-300">
         <h3 class="font-semibold text-gray-900 mb-2 flex items-center gap-2">
@@ -133,7 +127,6 @@
     </div>
     @endif
 
-    {{-- Recent Expenses --}}
     @if($recentExpenses->count() > 0)
     <div class="animate-fade-in delay-400">
         <div class="flex items-center justify-between mb-2">
