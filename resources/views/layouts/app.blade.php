@@ -34,6 +34,17 @@
             }
         };
 
+        // Close modal on overlay click
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay') && e.target.classList.contains('active')) {
+                // Jangan close otomatis untuk modal konfirmasi
+                if (e.target.id === 'custom-confirm-modal') return;
+                
+                e.target.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
         // Image Preview
         window.previewImage = function(input, previewId) {
             var preview = document.getElementById(previewId);
