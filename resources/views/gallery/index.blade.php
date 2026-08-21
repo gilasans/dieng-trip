@@ -84,12 +84,14 @@
             <div>
                 <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wider">Pilih File</label>
                 <div class="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition-all duration-300" onclick="document.getElementById('file-input').click()">
-                    <span class="text-3xl">📁</span>
+                    <span class="text-3xl" id="upload-icon">📁</span>
                     <p class="text-sm text-gray-500 mt-2 font-medium">Tap untuk pilih foto/video</p>
                     <p class="text-xs text-gray-400">Bisa pilih beberapa sekaligus</p>
-                    <input type="file" id="file-input" name="files[]" multiple accept="image/*,video/*" class="hidden" onchange="showFileCount(this)">
+                    <input type="file" id="file-input" name="files[]" multiple accept="image/*,video/*" class="hidden" onchange="showFilePreview(this)">
                 </div>
                 <p id="file-count" class="text-xs text-emerald-600 mt-1.5 font-medium hidden"></p>
+                {{-- Preview Grid --}}
+                <div id="file-preview-grid" class="hidden mt-3 grid grid-cols-3 gap-2"></div>
             </div>
 
             <div>
@@ -117,11 +119,50 @@
 
 @section('scripts')
 <script>
-function showFileCount(input) {
+function showFilePreview(input) {
     const count = input.files.length;
     const el = document.getElementById('file-count');
     el.textContent = `${count} file dipilih`;
     el.classList.remove('hidden');
+
+    const grid = document.getElementById('file-preview-grid');
+    grid.innerHTML = '';
+
+    if (count === 0) {
+        grid.classList.add('hidden');
+        return;
+    }
+    grid.classList.remove('hidden');
+
+    Array.from(input.files).forEach(function(file) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative rounded-xl overflow-hidden bg-gray-100 aspect-square';
+
+        if (file.type.startsWith('video/')) {
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(file);
+            video.className = 'w-full h-full object-cover';
+            video.muted = true;
+            const badge = document.createElement('div');
+            badge.className = 'absolute inset-0 flex items-center justify-center';
+            badge.innerHTML = '<span class="text-2xl">▶️</span>';
+            wrapper.appendChild(video);
+            wrapper.appendChild(badge);
+        } else {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.className = 'w-full h-full object-cover';
+            img.alt = file.name;
+            wrapper.appendChild(img);
+        }
+
+        const nameBadge = document.createElement('p');
+        nameBadge.className = 'absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[9px] truncate px-1 py-0.5';
+        nameBadge.textContent = file.name;
+        wrapper.appendChild(nameBadge);
+
+        grid.appendChild(wrapper);
+    });
 }
 
 document.getElementById('upload-form').addEventListener('submit', async function(e) {

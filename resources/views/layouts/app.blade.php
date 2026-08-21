@@ -16,6 +16,124 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    {{-- Global helpers: defined as regular script (not module) so inline onclick handlers can always call them --}}
+    <script>
+        // Modal System
+        window.openModal = function(modalId) {
+            var modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        };
+        window.closeModal = function(modalId) {
+            var modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        };
+
+        // Image Preview
+        window.previewImage = function(input, previewId) {
+            var preview = document.getElementById(previewId);
+            if (input.files && input.files[0] && preview) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        // Toast
+        window.showToast = function(message, type, duration) {
+            type = type || 'success';
+            duration = duration || 3000;
+            var icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+            var container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'toast-container';
+                document.body.appendChild(container);
+            }
+            var toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.innerHTML = '<div class="flex items-center gap-2"><span>' + (icons[type] || '✅') + '</span><span>' + message + '</span></div>';
+            container.appendChild(toast);
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(function() { toast.remove(); }, 300);
+            }, duration);
+        };
+
+        // AJAX Helper
+        window.ajax = async function(url, options) {
+            options = options || {};
+            var headers = {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                'Accept': 'application/json',
+            };
+            if (!(options.body instanceof FormData)) {
+                headers['Content-Type'] = 'application/json';
+                if (options.body && typeof options.body === 'object') {
+                    options.body = JSON.stringify(options.body);
+                }
+            }
+            var config = Object.assign({}, options, { headers: Object.assign({}, headers, options.headers || {}) });
+            if (options.body instanceof FormData) delete config.headers['Content-Type'];
+            try {
+                var response = await fetch(url, config);
+                var data = await response.json();
+                if (!response.ok) throw { status: response.status, data: data };
+                return data;
+            } catch (error) {
+                if (error && error.data) throw error;
+                throw { status: 500, data: { message: 'Koneksi gagal. Coba lagi.' } };
+            }
+        };
+
+        // Custom Confirm
+        window.customConfirm = function(message, title) {
+            title = title || 'Konfirmasi';
+            return new Promise(function(resolve) {
+                document.getElementById('confirm-title').innerText = title;
+                document.getElementById('confirm-message').innerText = message;
+                window.openModal('custom-confirm-modal');
+                document.getElementById('confirm-ok-btn').onclick = function() {
+                    window.closeModal('custom-confirm-modal');
+                    resolve(true);
+                };
+                document.getElementById('confirm-cancel-btn').onclick = function() {
+                    window.closeModal('custom-confirm-modal');
+                    resolve(false);
+                };
+            });
+        };
+
+        // Lightbox
+        window.openLightbox = function(src) {
+            var lightbox = document.getElementById('lightbox');
+            if (!lightbox) {
+                lightbox = document.createElement('div');
+                lightbox.id = 'lightbox';
+                lightbox.className = 'lightbox';
+                lightbox.onclick = function() {
+                    lightbox.classList.remove('active');
+                    document.body.style.overflow = '';
+                };
+                document.body.appendChild(lightbox);
+            }
+            lightbox.innerHTML = '<img src="' + src + '" alt="Preview" class="animate-scale-in">';
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+    </script>
+
     <style>
         body {
             font-family: 'Poppins', sans-serif;
